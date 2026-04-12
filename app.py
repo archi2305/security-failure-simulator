@@ -4,9 +4,20 @@ import hashlib
 st.set_page_config(page_title="Security Simulator", layout="centered")
 
 # -----------------------------
+# SUMMARY FUNCTION
+# -----------------------------
+def show_summary(attack, principle, prevention):
+    st.markdown("### 📊 Simulation Summary")
+    st.success(f"**Attack Type:** {attack}")
+    st.error(f"**Failed Principle:** {principle}")
+    st.info(f"**Prevention:** {prevention}")
+
+# -----------------------------
 # TITLE
 # -----------------------------
 st.title("🔐 Security Failure Case Study Simulator")
+
+st.markdown("### 🧪 Choose a scenario and observe how security failures lead to attacks.")
 
 st.write("This application demonstrates how security failures lead to cyber attacks and how they can be prevented.")
 
@@ -39,7 +50,7 @@ if st.button("Run Simulation"):
         st.write("🔓 Demonstrating weak encryption using small key...")
 
         message = "HELLO"
-        key = 2  # weak key
+        key = 2
 
         encrypted = ""
         for char in message:
@@ -63,6 +74,12 @@ if st.button("Run Simulation"):
         st.error("❌ Confidentiality Failed due to weak key")
 
         st.info("✔ Prevention: Use strong encryption (AES with large key size)")
+
+        show_summary(
+            "Brute Force Attack",
+            "Confidentiality",
+            "Use strong encryption algorithms with large key sizes (AES)"
+        )
 
     # =====================================================
     # 2. NO INTEGRITY CHECK
@@ -94,6 +111,12 @@ if st.button("Run Simulation"):
 
         st.info("✔ Prevention: Use hashing (SHA-256) to ensure integrity")
 
+        show_summary(
+            "Message Tampering",
+            "Integrity",
+            "Use hashing algorithms like SHA-256"
+        )
+
     # =====================================================
     # 3. NO AUTHENTICATION
     # =====================================================
@@ -111,6 +134,12 @@ if st.button("Run Simulation"):
             st.error("❌ Authentication Failed")
 
             st.info("✔ Prevention: Use password authentication + hashing + OTP")
+
+            show_summary(
+                "Unauthorized Access",
+                "Authentication",
+                "Use password + hashing + multi-factor authentication"
+            )
 
     # =====================================================
     # 4. MAN-IN-THE-MIDDLE ATTACK
@@ -137,6 +166,12 @@ if st.button("Run Simulation"):
 
         st.info("✔ Prevention: Use encryption during transmission (HTTPS, TLS)")
 
+        show_summary(
+            "Man-in-the-Middle Attack",
+            "Confidentiality",
+            "Use encryption protocols like HTTPS/TLS"
+        )
+
     # =====================================================
     # 5. POOR ACCESS CONTROL
     # =====================================================
@@ -155,6 +190,12 @@ if st.button("Run Simulation"):
 
                 st.info("✔ Prevention: Implement Role-Based Access Control (RBAC)")
 
+                show_summary(
+                    "Privilege Misuse",
+                    "Authorization",
+                    "Implement Role-Based Access Control (RBAC)"
+                )
+
             else:
                 st.success("✅ Action allowed safely")
 
@@ -162,4 +203,4 @@ if st.button("Run Simulation"):
 # FOOTER
 # -----------------------------
 st.markdown("---")
-st.caption("Developed for Information Security Project | Educational Use Only")
+st.caption("🔐 Educational Simulator for Information Security | Developed using Streamlit")
