@@ -12,62 +12,76 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
     .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #312e81 100%);
-        color: #e2e8f0;
+        background: linear-gradient(135deg, #f6f0ff 0%, #eef4ff 45%, #fff3f8 100%);
+        color: #3d3b52;
+        font-family: 'Inter', sans-serif;
+    }
+    .block-container {
+        max-width: 930px;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }
     h1, h2, h3, h4 {
-        color: #f8fafc !important;
-        letter-spacing: 0.3px;
+        color: #2f2c47 !important;
+        letter-spacing: 0.2px;
     }
     .hero-text {
-        font-size: 1.08rem;
-        color: #cbd5e1;
-        margin-bottom: 1.2rem;
+        font-size: 1.05rem;
+        line-height: 1.65;
+        color: #5d5a76;
+        margin-bottom: 1rem;
     }
     .card {
-        background: rgba(15, 23, 42, 0.62);
-        border: 1px solid rgba(148, 163, 184, 0.24);
-        border-radius: 16px;
-        padding: 1.1rem 1.1rem 0.8rem 1.1rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 12px 28px rgba(2, 6, 23, 0.30);
-        transition: all 0.25s ease;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(214, 209, 240, 0.75);
+        border-radius: 18px;
+        padding: 1.25rem 1.25rem 1rem 1.25rem;
+        margin-bottom: 1.15rem;
+        box-shadow: 0 10px 25px rgba(151, 156, 205, 0.18);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 34px rgba(59, 130, 246, 0.22);
-        border-color: rgba(96, 165, 250, 0.38);
+        transform: scale(1.01);
+        box-shadow: 0 12px 28px rgba(159, 167, 222, 0.22);
     }
     .section-title {
-        font-size: 1.2rem;
+        font-size: 1.32rem;
         font-weight: 650;
-        margin-bottom: 0.3rem;
-        color: #dbeafe;
+        margin-bottom: 0.6rem;
+        color: #373553;
     }
     .summary-title {
-        font-size: 1.18rem;
+        font-size: 1.2rem;
         font-weight: 700;
-        margin-top: 0.2rem;
-        margin-bottom: 0.5rem;
-        color: #ede9fe;
+        margin-top: 0.1rem;
+        margin-bottom: 0.65rem;
+        color: #3d3b5f;
     }
     div[data-testid="stSidebar"] {
-        background: rgba(15, 23, 42, 0.92);
-        border-right: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(255, 255, 255, 0.7);
+        border-right: 1px solid rgba(212, 208, 238, 0.85);
+    }
+    div[data-testid="stSidebar"] * {
+        color: #3f3b5b !important;
+    }
+    .stMarkdown p {
+        margin-bottom: 0.65rem;
+    }
+    div[data-baseweb="select"] > div {
+        border-radius: 12px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Function to show simulation animation
-def show_simulation_animation():
-    progress = st.progress(0, text="Running simulation...")
-    for i in range(1, 101, 25):
-        time.sleep(0.03)
-        progress.progress(i, text=f"Running simulation... {i}%")
-    progress.empty()
+# Function to show subtle loading animation
+def show_simulation_loader(text):
+    with st.spinner(text):
+        time.sleep(0.2)
 
 # Function to show summary section
 def show_summary(attack, principle, prevention):
@@ -87,39 +101,33 @@ def show_summary(attack, principle, prevention):
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Sidebar
-st.sidebar.title("🛡️ Security Simulator")
-st.sidebar.markdown("---")
-st.sidebar.write("This project demonstrates basic security failures.")
-st.sidebar.caption("Navigate scenarios using tabs in the main view.")
+st.sidebar.title("Security Simulator")
+scenario = st.sidebar.selectbox(
+    "Choose Scenario",
+    [
+        "Weak Encryption",
+        "No Integrity Check",
+        "No Authentication",
+        "Man-in-the-Middle Attack",
+        "Poor Access Control"
+    ]
+)
+st.sidebar.caption("Minimal demo of common security failures.")
 
 # Main UI
-st.title("🛡️ Security Failure Case Study Simulator")
+st.title("Security Failure Case Study Simulator")
 st.markdown(
     '<p class="hero-text">This tool demonstrates how common security mistakes lead to attacks and how to prevent them.</p>',
     unsafe_allow_html=True
 )
 
-st.markdown("---")
-
-# Scenario tabs
-tabs = st.tabs(
-    [
-        "🔓 Weak Encryption",
-        "🧩 No Integrity Check",
-        "🔐 No Authentication",
-        "🕵️ MITM Attack",
-        "🚫 Poor Access Control"
-    ]
-)
-
 # -----------------------------
 # 1. Weak Encryption
 # -----------------------------
-with tabs[0]:
+if scenario == "Weak Encryption":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🔓 Scenario: Weak Encryption</div>', unsafe_allow_html=True)
-    with st.spinner("Simulating brute force attack..."):
-        show_simulation_animation()
+    st.markdown('<div class="section-title">Weak Encryption</div>', unsafe_allow_html=True)
+    show_simulation_loader("Running simulation...")
 
     message = "HELLO"
     key = 2
@@ -160,11 +168,10 @@ with tabs[0]:
 # -----------------------------
 # 2. No Integrity Check
 # -----------------------------
-with tabs[1]:
+elif scenario == "No Integrity Check":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🧩 Scenario: No Integrity Check</div>', unsafe_allow_html=True)
-    with st.spinner("Checking data integrity..."):
-        show_simulation_animation()
+    st.markdown('<div class="section-title">No Integrity Check</div>', unsafe_allow_html=True)
+    show_simulation_loader("Running simulation...")
 
     message = "Pay 5000"
     tampered = "Pay 9000"
@@ -201,11 +208,10 @@ with tabs[1]:
 # -----------------------------
 # 3. No Authentication
 # -----------------------------
-with tabs[2]:
+elif scenario == "No Authentication":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🔐 Scenario: No Authentication</div>', unsafe_allow_html=True)
-    with st.spinner("Evaluating login flow..."):
-        show_simulation_animation()
+    st.markdown('<div class="section-title">No Authentication</div>', unsafe_allow_html=True)
+    show_simulation_loader("Running simulation...")
 
     user = st.text_input("Enter Username")
 
@@ -226,11 +232,10 @@ with tabs[2]:
 # -----------------------------
 # 4. MITM Attack
 # -----------------------------
-with tabs[3]:
+elif scenario == "Man-in-the-Middle Attack":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🕵️ Scenario: Man-in-the-Middle Attack</div>', unsafe_allow_html=True)
-    with st.spinner("Simulating network interception..."):
-        show_simulation_animation()
+    st.markdown('<div class="section-title">Man-in-the-Middle Attack</div>', unsafe_allow_html=True)
+    show_simulation_loader("Running simulation...")
 
     msg = "HELLO USER"
 
@@ -261,11 +266,10 @@ with tabs[3]:
 # -----------------------------
 # 5. Poor Access Control
 # -----------------------------
-with tabs[4]:
+elif scenario == "Poor Access Control":
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">🚫 Scenario: Poor Access Control</div>', unsafe_allow_html=True)
-    with st.spinner("Checking access rules..."):
-        show_simulation_animation()
+    st.markdown('<div class="section-title">Poor Access Control</div>', unsafe_allow_html=True)
+    show_simulation_loader("Running simulation...")
 
     action = st.selectbox("Select Action", ["View Data", "Delete Records"])
 
