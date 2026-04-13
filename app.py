@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Simple summary function
+# Function to show summary
 def show_summary(attack, principle, prevention):
     st.subheader("Simulation Summary")
 
@@ -22,7 +22,7 @@ def show_summary(attack, principle, prevention):
     col3.write("Prevention:")
     col3.info(prevention)
 
-# Sidebar for navigation
+# Sidebar
 st.sidebar.title("Simulator")
 
 scenario = st.sidebar.selectbox(
@@ -36,162 +36,163 @@ scenario = st.sidebar.selectbox(
     ]
 )
 
-run = st.sidebar.button("Run Simulation")
-
 st.sidebar.markdown("---")
 st.sidebar.write("This project demonstrates basic security failures.")
 
-# Main heading
+# Main UI
 st.title("Security Failure Case Study Simulator")
 st.write("This tool shows how security mistakes lead to attacks and how to prevent them.")
 
 st.markdown("---")
 
-# Run simulation
-if run:
+# Always show selected scenario (NO button needed)
+st.subheader(f"Scenario: {scenario}")
 
-    st.subheader(f"Scenario: {scenario}")
+# -----------------------------
+# 1. Weak Encryption
+# -----------------------------
+if scenario == "Weak Encryption":
 
-    # 1. Weak Encryption
-    if scenario == "Weak Encryption":
+    message = "HELLO"
+    key = 2
 
-        # Simple encryption using small key
-        message = "HELLO"
-        key = 2
+    encrypted = ""
+    for c in message:
+        encrypted += chr(ord(c) + key)
 
-        encrypted = ""
-        for c in message:
-            encrypted += chr(ord(c) + key)
+    col1, col2 = st.columns(2)
 
-        col1, col2 = st.columns(2)
+    col1.write("Original Message")
+    col1.code(message)
 
-        col1.write("Original Message")
-        col1.code(message)
+    col2.write("Encrypted Message")
+    col2.code(encrypted)
 
-        col2.write("Encrypted Message")
-        col2.code(encrypted)
+    st.warning("Trying brute force attack")
 
-        st.warning("Trying brute force attack")
+    for k in range(1, 6):
+        attempt = ""
+        for c in encrypted:
+            attempt += chr(ord(c) - k)
 
-        # Brute force logic
-        for k in range(1, 6):
-            attempt = ""
-            for c in encrypted:
-                attempt += chr(ord(c) - k)
+        st.write(f"Key {k}: {attempt}")
 
-            st.write(f"Key {k}: {attempt}")
+        if attempt == message:
+            st.success("Message cracked")
 
-            if attempt == message:
-                st.success("Message cracked")
+    st.error("Confidentiality failed")
 
-        st.error("Confidentiality failed")
+    show_summary(
+        "Brute Force Attack",
+        "Confidentiality",
+        "Use strong encryption like AES"
+    )
 
-        show_summary(
-            "Brute Force Attack",
-            "Confidentiality",
-            "Use strong encryption like AES"
-        )
+# -----------------------------
+# 2. No Integrity Check
+# -----------------------------
+elif scenario == "No Integrity Check":
 
-    # 2. No Integrity Check
-    elif scenario == "No Integrity Check":
+    message = "Pay 5000"
+    tampered = "Pay 9000"
 
-        message = "Pay 5000"
-        tampered = "Pay 9000"
+    col1, col2 = st.columns(2)
 
-        col1, col2 = st.columns(2)
+    col1.write("Original Message")
+    col1.code(message)
 
-        col1.write("Original Message")
-        col1.code(message)
+    col2.write("Tampered Message")
+    col2.code(tampered)
 
-        col2.write("Tampered Message")
-        col2.code(tampered)
+    st.error("No integrity protection")
 
-        st.error("No integrity protection")
+    h1 = hashlib.sha256(message.encode()).hexdigest()
+    h2 = hashlib.sha256(tampered.encode()).hexdigest()
 
-        # Hash comparison
-        h1 = hashlib.sha256(message.encode()).hexdigest()
-        h2 = hashlib.sha256(tampered.encode()).hexdigest()
+    st.write("Original Hash:")
+    st.code(h1)
 
-        st.write("Original Hash:")
-        st.code(h1)
+    st.write("Tampered Hash:")
+    st.code(h2)
 
-        st.write("Tampered Hash:")
-        st.code(h2)
+    if h1 != h2:
+        st.success("Change detected using hash")
 
-        if h1 != h2:
-            st.success("Change detected using hash")
+    show_summary(
+        "Message Tampering",
+        "Integrity",
+        "Use hashing like SHA-256"
+    )
 
-        show_summary(
-            "Message Tampering",
-            "Integrity",
-            "Use hashing like SHA-256"
-        )
+# -----------------------------
+# 3. No Authentication
+# -----------------------------
+elif scenario == "No Authentication":
 
-    # 3. No Authentication
-    elif scenario == "No Authentication":
+    user = st.text_input("Enter Username")
 
-        user = st.text_input("Enter Username")
+    if user:
+        st.warning(f"Access granted to {user} without password")
 
-        # No password check, so anyone gets access
-        if user:
-            st.warning(f"Access granted to {user} without password")
+        st.write("User can access sensitive data")
 
-            st.write("User can access sensitive data")
-
-            st.error("Authentication failed")
-
-            show_summary(
-                "Unauthorized Access",
-                "Authentication",
-                "Use password and multi-factor authentication"
-            )
-
-    # 4. Man-in-the-Middle Attack
-    elif scenario == "Man-in-the-Middle Attack":
-
-        msg = "HELLO USER"
-
-        col1, col2 = st.columns(2)
-
-        col1.write("Sender sends")
-        col1.code(msg)
-
-        col2.write("Attacker reads")
-        col2.code(msg)
-
-        st.error("Data is visible to attacker")
-
-        st.write("After encryption:")
-
-        encrypted = "X7@#91$!"
-        st.code(encrypted)
-
-        st.success("Attacker cannot understand encrypted data")
+        st.error("Authentication failed")
 
         show_summary(
-            "MITM Attack",
-            "Confidentiality",
-            "Use HTTPS and encryption"
+            "Unauthorized Access",
+            "Authentication",
+            "Use password and multi-factor authentication"
         )
 
-    # 5. Poor Access Control
-    elif scenario == "Poor Access Control":
+# -----------------------------
+# 4. MITM Attack
+# -----------------------------
+elif scenario == "Man-in-the-Middle Attack":
 
-        action = st.selectbox("Select Action", ["View Data", "Delete Records"])
+    msg = "HELLO USER"
 
-        # No proper role restriction
-        if action == "Delete Records":
-            st.warning("User deleted records without permission")
+    col1, col2 = st.columns(2)
 
-            st.error("Authorization failed")
+    col1.write("Sender sends")
+    col1.code(msg)
 
-            show_summary(
-                "Privilege Misuse",
-                "Authorization",
-                "Use role-based access control"
-            )
-        else:
-            st.success("Safe action allowed")
+    col2.write("Attacker reads")
+    col2.code(msg)
+
+    st.error("Data is visible to attacker")
+
+    st.write("After encryption:")
+
+    encrypted = "X7@#91$!"
+    st.code(encrypted)
+
+    st.success("Attacker cannot understand encrypted data")
+
+    show_summary(
+        "MITM Attack",
+        "Confidentiality",
+        "Use HTTPS and encryption"
+    )
+
+# -----------------------------
+# 5. Poor Access Control
+# -----------------------------
+elif scenario == "Poor Access Control":
+
+    action = st.selectbox("Select Action", ["View Data", "Delete Records"])
+
+    if action == "Delete Records":
+        st.warning("User deleted records without permission")
+
+        st.error("Authorization failed")
+
+        show_summary(
+            "Privilege Misuse",
+            "Authorization",
+            "Use role-based access control"
+        )
+    else:
+        st.success("Safe action allowed")
 
 # Footer
 st.markdown("---")
