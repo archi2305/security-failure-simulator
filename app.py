@@ -1,31 +1,67 @@
 import streamlit as st
 import hashlib
 
-st.set_page_config(page_title="Security Simulator", layout="centered")
+# -----------------------------
+# PAGE CONFIG
+# -----------------------------
+st.set_page_config(
+    page_title="Security Simulator",
+    page_icon="🔐",
+    layout="wide"
+)
+
+# -----------------------------
+# CUSTOM CSS (PREMIUM LOOK)
+# -----------------------------
+st.markdown("""
+<style>
+.main {
+    background-color: #0e1117;
+}
+h1, h2, h3 {
+    color: #ffffff;
+}
+.stButton>button {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+    height: 3em;
+    width: 100%;
+}
+.stSelectbox div {
+    border-radius: 10px;
+}
+.block-container {
+    padding: 2rem 3rem;
+}
+.card {
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #1c1f26;
+    margin-bottom: 20px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.5);
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -----------------------------
 # SUMMARY FUNCTION
 # -----------------------------
 def show_summary(attack, principle, prevention):
     st.markdown("### 📊 Simulation Summary")
-    st.success(f"**Attack Type:** {attack}")
-    st.error(f"**Failed Principle:** {principle}")
-    st.info(f"**Prevention:** {prevention}")
+    col1, col2, col3 = st.columns(3)
+
+    col1.success(f"**Attack**\n\n{attack}")
+    col2.error(f"**Failed Principle**\n\n{principle}")
+    col3.info(f"**Prevention**\n\n{prevention}")
 
 # -----------------------------
-# TITLE
+# SIDEBAR
 # -----------------------------
-st.title("🔐 Security Failure Case Study Simulator")
+st.sidebar.title("🔐 Simulator")
 
-st.markdown("### 🧪 Choose a scenario and observe how security failures lead to attacks.")
-
-st.write("This application demonstrates how security failures lead to cyber attacks and how they can be prevented.")
-
-# -----------------------------
-# SCENARIO SELECTION
-# -----------------------------
-scenario = st.selectbox(
-    "Select a Security Failure Scenario:",
+scenario = st.sidebar.selectbox(
+    "Choose Scenario",
     [
         "Weak Encryption",
         "No Integrity Check",
@@ -35,10 +71,27 @@ scenario = st.selectbox(
     ]
 )
 
+run = st.sidebar.button("🚀 Run Simulation")
+
+st.sidebar.markdown("---")
+st.sidebar.info(
+    "📘 This simulator demonstrates how security failures lead to cyber attacks.\n\nBuilt using Python & Streamlit."
+)
+
 # -----------------------------
-# RUN SIMULATION
+# HEADER
 # -----------------------------
-if st.button("Run Simulation"):
+st.markdown("""
+# 🔐 Security Failure Case Study Simulator
+### 🧪 Visualize Security Failures & Attacks
+""")
+
+st.markdown("---")
+
+# -----------------------------
+# MAIN LOGIC
+# -----------------------------
+if run:
 
     st.subheader(f"🔎 Scenario: {scenario}")
 
@@ -47,160 +100,146 @@ if st.button("Run Simulation"):
     # =====================================================
     if scenario == "Weak Encryption":
 
-        st.write("🔓 Demonstrating weak encryption using small key...")
-
         message = "HELLO"
         key = 2
 
-        encrypted = ""
-        for char in message:
-            encrypted += chr(ord(char) + key)
+        encrypted = "".join(chr(ord(c)+key) for c in message)
 
-        st.write(f"Plain Text: {message}")
-        st.write(f"Encrypted Text: {encrypted}")
+        col1, col2 = st.columns(2)
 
-        st.warning("⚠ Attacker starts brute force attack...")
+        with col1:
+            st.markdown("### 📥 Original")
+            st.code(message)
+
+        with col2:
+            st.markdown("### 🔐 Encrypted")
+            st.code(encrypted)
+
+        st.warning("⚠ Brute force attack in progress...")
 
         for k in range(1, 6):
-            attempt = ""
-            for char in encrypted:
-                attempt += chr(ord(char) - k)
-
+            attempt = "".join(chr(ord(c)-k) for c in encrypted)
             st.write(f"Trying key {k}: {attempt}")
 
             if attempt == message:
-                st.success("✅ Message cracked successfully!")
+                st.success("✅ Message cracked!")
 
-        st.error("❌ Confidentiality Failed due to weak key")
-
-        st.info("✔ Prevention: Use strong encryption (AES with large key size)")
+        st.error("❌ Confidentiality Failed")
 
         show_summary(
             "Brute Force Attack",
             "Confidentiality",
-            "Use strong encryption algorithms with large key sizes (AES)"
+            "Use AES with strong key sizes"
         )
 
     # =====================================================
-    # 2. NO INTEGRITY CHECK
+    # 2. INTEGRITY
     # =====================================================
     elif scenario == "No Integrity Check":
 
-        st.write("📩 Sending message without integrity protection...")
-
         message = "Pay 5000"
-        st.write(f"Original Message: {message}")
+        tampered = "Pay 9000"
 
-        tampered_message = "Pay 9000"
+        col1, col2 = st.columns(2)
 
-        st.warning("⚠ Message intercepted and modified!")
-        st.write(f"Tampered Message: {tampered_message}")
+        with col1:
+            st.markdown("### 📩 Original Message")
+            st.code(message)
 
-        st.error("❌ Receiver cannot detect change (No Integrity Check)")
+        with col2:
+            st.markdown("### ⚠ Tampered Message")
+            st.code(tampered)
 
-        st.subheader("🔐 Applying Hash for Integrity Check")
+        st.error("❌ No integrity protection")
 
-        original_hash = hashlib.sha256(message.encode()).hexdigest()
-        tampered_hash = hashlib.sha256(tampered_message.encode()).hexdigest()
+        h1 = hashlib.sha256(message.encode()).hexdigest()
+        h2 = hashlib.sha256(tampered.encode()).hexdigest()
 
-        st.write(f"Original Hash: {original_hash}")
-        st.write(f"Tampered Hash: {tampered_hash}")
+        st.markdown("### 🔐 Hash Comparison")
+        st.code(f"Original: {h1}")
+        st.code(f"Tampered: {h2}")
 
-        if original_hash != tampered_hash:
-            st.success("✅ Integrity Violation Detected!")
-
-        st.info("✔ Prevention: Use hashing (SHA-256) to ensure integrity")
+        if h1 != h2:
+            st.success("✅ Integrity violation detected!")
 
         show_summary(
             "Message Tampering",
             "Integrity",
-            "Use hashing algorithms like SHA-256"
+            "Use SHA-256 hashing"
         )
 
     # =====================================================
-    # 3. NO AUTHENTICATION
+    # 3. AUTHENTICATION
     # =====================================================
     elif scenario == "No Authentication":
 
-        st.write("🔓 System without authentication...")
-
-        username = st.text_input("Enter username:")
+        user = st.text_input("Enter Username")
 
         if st.button("Login"):
-            st.warning(f"⚠ Access granted to {username} without password!")
-
-            st.write("Attacker logged in as admin and modified sensitive data.")
+            st.warning(f"⚠ Access granted to {user} without password!")
 
             st.error("❌ Authentication Failed")
-
-            st.info("✔ Prevention: Use password authentication + hashing + OTP")
 
             show_summary(
                 "Unauthorized Access",
                 "Authentication",
-                "Use password + hashing + multi-factor authentication"
+                "Use password + MFA"
             )
 
     # =====================================================
-    # 4. MAN-IN-THE-MIDDLE ATTACK
+    # 4. MITM
     # =====================================================
     elif scenario == "Man-in-the-Middle Attack":
 
-        st.write("📡 Sending message over insecure network...")
+        msg = "HELLO USER"
 
-        message = "HELLO USER"
+        col1, col2 = st.columns(2)
 
-        st.write(f"Sender sends: {message}")
+        with col1:
+            st.markdown("### 📤 Sender")
+            st.code(msg)
 
-        st.warning("⚠ Attacker intercepts the message!")
-        st.write(f"Attacker reads: {message}")
+        with col2:
+            st.markdown("### 🕵 Attacker Reads")
+            st.code(msg)
 
-        st.error("❌ Confidentiality Failed")
+        st.error("❌ Data exposed!")
 
-        st.subheader("🔐 Applying Encryption")
+        st.markdown("### 🔐 After Encryption")
+        st.code("X7@#91$!")
 
-        encrypted = "X7@#91$!"
-        st.write(f"Encrypted Message: {encrypted}")
-
-        st.success("✅ Attacker cannot understand encrypted data")
-
-        st.info("✔ Prevention: Use encryption during transmission (HTTPS, TLS)")
+        st.success("✅ Attacker cannot understand data")
 
         show_summary(
-            "Man-in-the-Middle Attack",
+            "MITM Attack",
             "Confidentiality",
-            "Use encryption protocols like HTTPS/TLS"
+            "Use HTTPS / TLS"
         )
 
     # =====================================================
-    # 5. POOR ACCESS CONTROL
+    # 5. ACCESS CONTROL
     # =====================================================
     elif scenario == "Poor Access Control":
 
-        st.write("👤 User Role: Student")
-
-        action = st.selectbox("Select Action:", ["View Data", "Delete Records"])
+        action = st.selectbox("Select Action", ["View Data", "Delete Records"])
 
         if st.button("Perform Action"):
 
             if action == "Delete Records":
-                st.warning("⚠ Student was able to delete records!")
+                st.warning("⚠ Student deleted records!")
 
                 st.error("❌ Authorization Failed")
-
-                st.info("✔ Prevention: Implement Role-Based Access Control (RBAC)")
 
                 show_summary(
                     "Privilege Misuse",
                     "Authorization",
-                    "Implement Role-Based Access Control (RBAC)"
+                    "Use RBAC"
                 )
-
             else:
-                st.success("✅ Action allowed safely")
+                st.success("✅ Safe action")
 
 # -----------------------------
 # FOOTER
 # -----------------------------
 st.markdown("---")
-st.caption("🔐 Educational Simulator for Information Security | Developed using Streamlit")
+st.caption("🔐 Information Security Mini Project | Streamlit UI")
