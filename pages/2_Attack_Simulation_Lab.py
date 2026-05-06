@@ -5,7 +5,7 @@ import streamlit as st
 
 from utils.security import caesar_encrypt
 from utils.state import add_log, bump_simulations, init_state
-from utils.style import apply_theme, end_card, explain, start_card
+from utils.style import apply_theme, end_card, start_card
 
 
 def show_simulation_loader(text: str) -> None:
@@ -32,6 +32,42 @@ def show_summary(attack: str, failed_principle: str, prevention: str) -> None:
     c2.error(failed_principle)
     c3.write("Defense")
     c3.info(prevention)
+
+
+def learning_sections(
+    what_is_this: str,
+    steps: list[str],
+    original_view: str,
+    attack_view: str,
+    result_view: str,
+    result_type: str,
+    why_text: str,
+    prevent_text: str,
+) -> None:
+    st.info(f"**What is this?** {what_is_this}")
+    st.markdown("#### What happens step-by-step")
+    show_steps(steps)
+
+    st.markdown("#### Visual simulation")
+    c1, c2, c3 = st.columns(3)
+    c1.markdown("**Original message/data**")
+    c1.code(original_view)
+    c2.markdown("**Attack happening**")
+    c2.code(attack_view)
+    c3.markdown("**Result**")
+    c3.code(result_view)
+
+    if result_type == "error":
+        st.error("Security failure observed in this simulation.")
+    elif result_type == "warning":
+        st.warning("Risk is visible in this simulation.")
+    else:
+        st.success("Secure outcome shown in this simulation.")
+
+    st.markdown("#### Why it happened")
+    st.warning(why_text)
+    st.markdown("#### How to prevent it")
+    st.success(prevent_text)
 
 
 st.set_page_config(page_title="Attack Simulation Lab | SecureSphere", page_icon="🧪", layout="wide")
@@ -65,15 +101,20 @@ if scenario == "Weak Encryption":
     record_run(scenario)
     message = "HELLO"
     encrypted = caesar_encrypt(message, 2)
-    st.code(f"Original: {message}\nEncrypted: {encrypted}")
-    show_steps(
-        [
-            "Message is encrypted with weak Caesar shift.",
-            "Attacker tries small key range.",
-            "Correct key is found quickly and plaintext is exposed.",
-        ]
+    learning_sections(
+        what_is_this="A weak encryption method with tiny key space.",
+        steps=[
+            "System encrypts message with a very simple shift.",
+            "Attacker tries multiple keys one by one.",
+            "Correct key appears quickly and plaintext is exposed.",
+        ],
+        original_view=message,
+        attack_view=f"Cipher text captured: {encrypted}",
+        result_view="Attacker decodes message: HELLO",
+        result_type="error",
+        why_text="The encryption is too simple, so attackers can test all keys quickly.",
+        prevent_text="Use strong modern encryption (AES) and safe key management.",
     )
-    explain("Weak algorithms and small key-space are easy to break through brute force.")
     show_summary("Brute Force", "Confidentiality", "Use modern encryption such as AES.")
     end_card()
 
@@ -83,19 +124,24 @@ elif scenario == "No Integrity Check":
     record_run(scenario)
     original_msg = "Pay 5000"
     tampered_msg = "Pay 9000"
-    st.code(f"Original: {original_msg}\nTampered: {tampered_msg}")
-    show_steps(
-        [
-            "Sender transmits financial message.",
-            "Attacker modifies amount during transit.",
-            "Receiver accepts changed message if integrity checks are missing.",
-        ]
+    learning_sections(
+        what_is_this="A tampering attack where message content changes in transit.",
+        steps=[
+            "Sender shares the original payment instruction.",
+            "Attacker edits amount during transmission.",
+            "Receiver trusts modified message when integrity checks are absent.",
+        ],
+        original_view=original_msg,
+        attack_view=tampered_msg,
+        result_view="Receiver acts on wrong amount.",
+        result_type="error",
+        why_text="No integrity verification exists before using message content.",
+        prevent_text="Use hashes/MAC/signatures to validate message integrity.",
     )
     h1 = hashlib.sha256(original_msg.encode()).hexdigest()
     h2 = hashlib.sha256(tampered_msg.encode()).hexdigest()
     st.write("Hash check after adding integrity control:")
     st.code(f"Original hash: {h1}\nTampered hash: {h2}")
-    explain("Integrity controls detect unauthorized changes in data.")
     show_summary("Message Tampering", "Integrity", "Use hashing and MAC validation.")
     end_card()
 
@@ -104,16 +150,22 @@ elif scenario == "No Authentication":
     show_simulation_loader("Running auth simulation...")
     record_run(scenario)
     username = st.text_input("Enter a username")
-    show_steps(
-        [
-            "User enters only username.",
-            "System grants access without password check.",
-            "Any identity can access sensitive resources.",
-        ]
+    learning_sections(
+        what_is_this="An authentication failure where identity is not verified.",
+        steps=[
+            "A user enters only a username.",
+            "System skips password or second-factor checks.",
+            "Unauthorized person receives access.",
+        ],
+        original_view="Login request from user",
+        attack_view="No password validation",
+        result_view="Access granted to unknown identity",
+        result_type="error",
+        why_text="The system does not verify who is requesting access.",
+        prevent_text="Require password checks and optional MFA for sensitive access.",
     )
     if username:
         st.warning(f"Access granted to {username} without verification.")
-    explain("Authentication ensures identity verification before access is granted.")
     show_summary("Unauthorized Access", "Authentication", "Require password and MFA.")
     end_card()
 
@@ -121,15 +173,20 @@ elif scenario == "Man-in-the-Middle Attack":
     start_card("Man-in-the-Middle Attack")
     show_simulation_loader("Running MITM simulation...")
     record_run(scenario)
-    st.code("Sender -> HELLO USER\nAttacker intercepts -> HELLO USER")
-    show_steps(
-        [
-            "Sender transmits plaintext message.",
-            "Attacker intercepts traffic in transit.",
-            "Without encryption, message content is readable.",
-        ]
+    learning_sections(
+        what_is_this="A communication attack where attacker reads data in transit.",
+        steps=[
+            "Sender sends message over insecure channel.",
+            "Attacker intercepts network traffic.",
+            "Plain text message is visible to attacker.",
+        ],
+        original_view="HELLO USER",
+        attack_view="Traffic intercepted by attacker",
+        result_view="Message content leaked",
+        result_type="error",
+        why_text="Data is sent without secure transport encryption.",
+        prevent_text="Use HTTPS/TLS and certificate validation.",
     )
-    explain("TLS/HTTPS prevents attackers from reading or tampering with communication.")
     show_summary("MITM", "Confidentiality", "Use HTTPS and certificate validation.")
     end_card()
 
@@ -138,18 +195,24 @@ elif scenario == "Poor Access Control":
     show_simulation_loader("Running authorization simulation...")
     record_run(scenario)
     action = st.selectbox("Requested action", ["View Data", "Delete Records"])
-    show_steps(
-        [
-            "User authenticates into application.",
-            "System fails to check role permissions.",
-            "Sensitive actions can be misused.",
-        ]
+    learning_sections(
+        what_is_this="An authorization issue where users can do actions beyond permission.",
+        steps=[
+            "User logs into the app.",
+            "System does not verify role permissions.",
+            "Sensitive action can be executed by wrong user.",
+        ],
+        original_view="Normal allowed action: View Data",
+        attack_view=f"Unauthorized request: {action}",
+        result_view="Possible privilege misuse",
+        result_type="warning",
+        why_text="Role checks are weak or missing for critical actions.",
+        prevent_text="Apply RBAC and least privilege checks before sensitive actions.",
     )
     if action == "Delete Records":
         st.error("Unauthorized delete executed.")
     else:
         st.success("Safe action selected.")
-    explain("Authorization controls should enforce role-based permissions.")
     show_summary("Privilege Misuse", "Authorization", "Implement RBAC and least privilege.")
     end_card()
 
@@ -164,14 +227,20 @@ elif scenario == "Password Brute Force Attack":
             st.success(f"Attempt {attempt}: password found -> {guess}")
             break
         st.write(f"Attempt {attempt}: {guess} (failed)")
-    show_steps(
-        [
-            "Attacker picks common passwords from dictionary.",
-            "Weak/short password is eventually matched.",
+    learning_sections(
+        what_is_this="A guessing attack using common passwords.",
+        steps=[
+            "Attacker tries dictionary/common passwords.",
+            "Weak password is matched after few attempts.",
             "Account is compromised.",
-        ]
+        ],
+        original_view="Protected account with weak password",
+        attack_view="Repeated login guesses",
+        result_view="Password discovered",
+        result_type="error",
+        why_text="Weak and short passwords are easy to guess.",
+        prevent_text="Use strong password policy, lockout controls, and MFA.",
     )
-    explain("Strong passwords, lockout, and MFA reduce brute-force success.")
     show_summary("Password Brute Force", "Authentication", "Use strong password policy + MFA.")
     end_card()
 
@@ -181,18 +250,24 @@ elif scenario == "SQL Injection Demo":
     record_run(scenario)
     user_input = st.text_input("Username input", "admin' OR '1'='1")
     query = f"SELECT * FROM users WHERE username = '{user_input}' AND password='x';"
+    learning_sections(
+        what_is_this="An input-based attack that changes SQL behavior.",
+        steps=[
+            "App directly inserts user input into SQL query.",
+            "Malicious pattern changes query logic.",
+            "System may bypass normal authentication checks.",
+        ],
+        original_view="Expected username: admin",
+        attack_view=user_input,
+        result_view="Query logic manipulated",
+        result_type="error",
+        why_text="Input is not safely handled before database query.",
+        prevent_text="Use parameterized queries and input validation.",
+    )
     st.write("Vulnerable query using direct string concatenation:")
     st.code(query, language="sql")
-    show_steps(
-        [
-            "Application builds SQL query from direct input.",
-            "Malicious payload alters query logic.",
-            "Authentication bypass may happen.",
-        ]
-    )
     st.write("Safer pattern:")
     st.code("SELECT * FROM users WHERE username = ? AND password = ?;", language="sql")
-    explain("Use parameterized queries and validation to prevent injection.")
     show_summary("SQL Injection", "Integrity/Authentication", "Use prepared statements.")
     end_card()
 
@@ -200,15 +275,20 @@ elif scenario == "Session Hijacking Concept":
     start_card("Session Hijacking Concept")
     show_simulation_loader("Running session attack simulation...")
     record_run(scenario)
-    st.code("Legitimate token: sess_9483_userA\nAttacker copies token and impersonates user")
-    show_steps(
-        [
+    learning_sections(
+        what_is_this="An attack where stolen session token is reused.",
+        steps=[
             "User logs in and receives active session token.",
-            "Attacker steals token via insecure channel/device.",
-            "Attacker reuses token to access account.",
-        ]
+            "Attacker steals token from unsafe environment/channel.",
+            "Attacker uses same token to impersonate user.",
+        ],
+        original_view="Legitimate token: sess_9483_userA",
+        attack_view="Token copied by attacker",
+        result_view="Attacker gains user session",
+        result_type="error",
+        why_text="Session token protection and lifecycle controls are weak.",
+        prevent_text="Use secure cookies, short expiry, and token rotation.",
     )
-    explain("Secure cookies, short token expiry, and token rotation reduce session hijacking risk.")
     show_summary("Session Hijacking", "Session Management", "Use secure cookie flags + rotation.")
     end_card()
 
@@ -218,17 +298,22 @@ elif scenario == "File Tampering Attack":
     record_run(scenario)
     original = "Marks: StudentA=78"
     tampered = "Marks: StudentA=98"
-    st.code(f"Original file line: {original}\nTampered line: {tampered}")
-    show_steps(
-        [
-            "File is stored without integrity verification.",
-            "Attacker edits the file content.",
-            "System trusts modified file as valid.",
-        ]
+    learning_sections(
+        what_is_this="A file integrity attack where content is altered after storage.",
+        steps=[
+            "File is stored without integrity checks.",
+            "Attacker modifies data in the file.",
+            "System trusts tampered content as real.",
+        ],
+        original_view=original,
+        attack_view=tampered,
+        result_view="Modified record is accepted",
+        result_type="error",
+        why_text="No checksum/signature verification before reading file.",
+        prevent_text="Use file hashing, digital signatures, and access controls.",
     )
     original_hash = hashlib.sha256(original.encode()).hexdigest()
     tampered_hash = hashlib.sha256(tampered.encode()).hexdigest()
     st.code(f"Original hash: {original_hash}\nTampered hash: {tampered_hash}")
-    explain("Checksum/hash comparison can detect tampering in important files.")
     show_summary("File Tampering", "Integrity", "Use hashes, signatures, and access control.")
     end_card()
