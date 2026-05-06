@@ -10,9 +10,10 @@ apply_theme()
 
 st.title("Dashboard")
 st.markdown(
-    '<p class="hero-text">Overview of platform activity and security posture.</p>',
+    '<p class="hero-text">Overview of your learning progress and system security posture.</p>',
     unsafe_allow_html=True,
 )
+st.info("These numbers update as you run simulations, test logins, and use tools.")
 
 stats = st.session_state.stats
 col1, col2, col3 = st.columns(3)
@@ -21,15 +22,13 @@ col2.metric("Login Attempts", stats["login_attempts"])
 col3.metric("Security Score", f'{stats["security_score"]}/100')
 
 start_card("Platform Trends")
-chart_data = {
-    "metric": ["Simulations", "Login Attempts", "Security Score"],
-    "value": [
-        stats["simulations_run"],
-        stats["login_attempts"],
-        stats["security_score"],
-    ],
-}
-st.bar_chart(chart_data, x="metric", y="value")
+st.bar_chart(
+    {
+        "Simulations": [stats["simulations_run"]],
+        "Login Attempts": [stats["login_attempts"]],
+        "Security Score": [stats["security_score"]],
+    }
+)
 end_card()
 
 start_card("Quick Insights")
@@ -39,4 +38,7 @@ elif stats["security_score"] >= 60:
     st.warning("Security posture is moderate. Run more secure checks.")
 else:
     st.error("Security posture is low. Review controls in Secure System and Tools.")
+st.markdown("#### What this means")
+st.write("- More secure actions generally improve the educational security score.")
+st.write("- Failed login attempts and risky actions should be reviewed in Activity Logs.")
 end_card()

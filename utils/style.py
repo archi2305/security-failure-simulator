@@ -8,7 +8,7 @@ def apply_theme() -> None:
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         .stApp {
-            background: linear-gradient(135deg, #f6f0ff 0%, #eef4ff 45%, #fff3f8 100%);
+            background: linear-gradient(135deg, #f5eeff 0%, #eaf3ff 50%, #f7f4ff 100%);
             color: #3d3b52;
             font-family: 'Inter', sans-serif;
         }
@@ -27,24 +27,13 @@ def apply_theme() -> None:
             color: #5d5a76;
             margin-bottom: 1rem;
         }
-        .card {
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid rgba(214, 209, 240, 0.75);
-            border-radius: 18px;
-            padding: 1.15rem 1.15rem 1rem 1.15rem;
-            margin-bottom: 1.1rem;
-            box-shadow: 0 10px 25px rgba(151, 156, 205, 0.18);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-        .card:hover {
-            transform: scale(1.008);
-            box-shadow: 0 12px 28px rgba(159, 167, 222, 0.22);
-        }
-        .section-title {
-            font-size: 1.22rem;
-            font-weight: 650;
-            margin-bottom: 0.55rem;
-            color: #373553;
+        .edu-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #dddaf5;
+            border-radius: 14px;
+            padding: 1rem 1rem 0.9rem 1rem;
+            margin: 0.4rem 0 0.9rem 0;
+            box-shadow: 0 8px 20px rgba(146, 152, 199, 0.14);
         }
         .explain-box {
             background: #f8f7ff;
@@ -67,13 +56,16 @@ def apply_theme() -> None:
 
 
 def start_card(title: str) -> None:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="section-title">{title}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="edu-card"><h3 style="margin-top:0.1rem;">{title}</h3></div>', unsafe_allow_html=True)
 
 
 def end_card() -> None:
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.divider()
 
 
 def explain(text: str) -> None:
     st.markdown(f'<div class="explain-box">{text}</div>', unsafe_allow_html=True)
+
+
+def section_note(title: str, text: str) -> None:
+    st.info(f"**{title}:** {text}")
