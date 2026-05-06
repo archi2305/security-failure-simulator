@@ -39,24 +39,43 @@ tabs = st.tabs(
 
 with tabs[0]:
     start_card("Hash Generator (SHA-256 / MD5)")
+    st.info(
+        "**What is this?** A hash is a fixed-length fingerprint of input text. It helps verify integrity and store passwords safely."
+    )
     text = st.text_area("Enter text", "SecureSphere")
     algo = st.selectbox("Algorithm", ["SHA-256", "MD5"])
+    c1, c2, c3 = st.columns(3)
+    c1.write("Input")
+    c1.code(text or "...")
+    c2.write("Processing")
+    c2.code(f"Apply {algo}")
     if st.button("Generate Hash"):
-        loader("Generating hash...")
+        loader("Processing...")
         digest = (
             hashlib.sha256(text.encode()).hexdigest()
             if algo == "SHA-256"
             else hashlib.md5(text.encode()).hexdigest()
         )
         add_log("hash_generated", f"Generated {algo} hash", actor=st.session_state.current_user or "guest")
-        st.code(digest)
+        c3.write("Output")
+        c3.code(digest)
+        st.success("Result: Text is converted into a one-way fingerprint.")
+        st.warning("If input changes even slightly, hash output changes.")
     end_card()
 
 with tabs[1]:
     start_card("Password Strength Analyzer")
+    st.info("**What is this?** Checks how difficult a password is to guess or crack.")
     candidate = st.text_input("Enter password", type="password", key="tool_pw")
     if candidate:
         label, score, feedback = check_password_strength(candidate)
+        c1, c2, c3 = st.columns(3)
+        c1.write("Input")
+        c1.code("*" * len(candidate))
+        c2.write("Processing")
+        c2.code("Length + case + number + symbol checks")
+        c3.write("Output")
+        c3.code(f"{label} ({score}/5)")
         st.write(f"Score: **{score}/5**")
         if label == "Weak":
             st.error(f"Strength: {label}")
@@ -69,14 +88,18 @@ with tabs[1]:
             for note in feedback:
                 st.write(f"- {note}")
         add_log("password_checked", f"Password strength analyzed ({label})", actor=st.session_state.current_user or "guest")
+        st.success("Result: You get actionable feedback to improve password security.")
     end_card()
 
 with tabs[2]:
     start_card("Encryption Comparison (Weak vs Stronger Demo)")
+    st.info(
+        "**What is this?** Compare weak encryption output with a stronger demo output to understand why algorithm choice matters."
+    )
     plain = st.text_input("Message", "HELLO TEAM")
     weak_key = st.slider("Weak key (Caesar shift)", 1, 5, 2)
     if st.button("Compare Encryption"):
-        loader("Comparing encryption outputs...")
+        loader("Processing...")
         weak_out = caesar_encrypt(plain, weak_key)
         strong_out = xor_encrypt_to_base64(plain, "StrongTeamKey@2026")
         c1, c2 = st.columns(2)
@@ -88,21 +111,35 @@ with tabs[2]:
             "Weak methods are easier to reverse. Production systems use tested standards "
             "such as AES-GCM with secure key management."
         )
+        st.warning("Why it happened: Weak ciphers leak patterns and are easy to brute-force.")
+        st.success("How to prevent it: Use modern, industry-standard encryption with safe keys.")
         add_log("encryption_compared", "Weak vs stronger encryption output compared", actor=st.session_state.current_user or "guest")
     end_card()
 
 with tabs[3]:
     start_card("Input-Based Security Checker")
+    st.info(
+        "**What is this?** Scans input text for risky patterns often seen in attacks (educational rule-based check)."
+    )
     sample_input = st.text_area("Enter an input string to inspect", "admin' OR '1'='1")
     if st.button("Analyze Input"):
-        loader("Analyzing input...")
+        loader("Processing...")
         issues = basic_input_security_check(sample_input)
+        c1, c2, c3 = st.columns(3)
+        c1.write("Input")
+        c1.code(sample_input)
+        c2.write("Processing")
+        c2.code("Pattern matching rules")
+        c3.write("Output")
+        c3.code(f"Issues found: {len(issues)}")
         if issues:
             st.error("Potential risky patterns detected:")
             for issue in issues:
                 st.write(f"- {issue}")
         else:
             st.success("No obvious risky pattern found in this simple check.")
+        st.warning("Why it happened: suspicious keywords/patterns were present in input.")
+        st.success("How to prevent it: validate input and use safe query handling.")
         st.caption("Rule-based checker for educational use.")
         add_log("input_checked", f"Input checked, issues found: {len(issues)}", actor=st.session_state.current_user or "guest")
     end_card()
