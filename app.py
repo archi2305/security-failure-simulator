@@ -10,19 +10,35 @@ apply_theme()
 
 st.title("SecureSphere - Interactive Cybersecurity Learning & Analysis Platform")
 st.markdown(
-    '<p class="hero-text">This app teaches cybersecurity concepts in simple language with step-by-step visual explanations.</p>',
+    '<p class="hero-text">Dashboard for practical cybersecurity learning modules: attack simulation, secure system, cryptographic tools, and logs.</p>',
     unsafe_allow_html=True,
 )
 
+stats = st.session_state.stats
+col1, col2, col3 = st.columns(3)
+col1.metric("Simulations Run", stats["simulations_run"])
+col2.metric("Login Attempts", stats["login_attempts"])
+col3.metric("Security Score", f'{stats["security_score"]}/100')
+
+start_card("Platform Trend Snapshot")
+st.bar_chart(
+    {
+        "Simulations": [stats["simulations_run"]],
+        "Login Attempts": [stats["login_attempts"]],
+        "Security Score": [stats["security_score"]],
+    }
+)
+end_card()
+
 start_card("How to Use")
-st.info("Start from **1_Dashboard**, then open each module from the sidebar page list.")
+st.info("Use the sidebar to navigate modules in sequence for a full learning flow.")
 st.markdown(
     """
-    - Open **Dashboard** to understand project stats first
-    - Go to **Attack Simulation Lab** to see attacks and why they work
-    - Use **Secure System** to understand registration, login, hashing, and role checks
-    - Try **Security Tools** for hands-on hashing, password checks, and input checks
-    - Finish at **Activity Logs** to review what actions were performed
+    - Open **simulator** to see insecure vs secure behavior
+    - Open **secure_system** to try bcrypt login, role control, and AES (Fernet) encryption
+    - Open **tools** for RSA signatures, hashes, and password checks
+    - Open **logs** to inspect recorded user actions
+    - Open **about** for architecture and team split
     """
 )
 st.success("Tip: Read each section top-to-bottom. Every module follows a learning flow.")

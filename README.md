@@ -11,14 +11,16 @@ info project/
 ├── app.py
 ├── requirements.txt
 ├── pages/
-│   ├── 1_Dashboard.py
-│   ├── 2_Attack_Simulation_Lab.py
-│   ├── 3_Secure_System.py
-│   ├── 4_Security_Tools.py
-│   ├── 5_Activity_Logs.py
-│   └── 6_About.py
+│   ├── simulator.py
+│   ├── secure_system.py
+│   ├── tools.py
+│   ├── logs.py
+│   └── about.py
 └── utils/
-    ├── security.py
+    ├── auth.py
+    ├── crypto.py
+    ├── signatures.py
+    ├── key_exchange.py
     ├── state.py
     └── style.py
 ```
@@ -27,8 +29,9 @@ info project/
 
 - Dashboard with simulation count, login attempts, security score, and charts
 - Attack Simulation Lab with existing and new scenarios
-- Secure System with registration/login, hashing, RBAC, and file encryption demo
-- Security Tools (SHA-256/MD5 hash generator, password analyzer, encryption comparison, input checker)
+- Secure System with bcrypt registration/login, RBAC, and Fernet (AES-based) encryption
+- Security Tools with RSA signature verification, SHA-256/MD5 hash generator, and password analyzer
+- Diffie-Hellman key exchange simulation in Attack Lab for secure-vs-insecure communication
 - Activity logs stored in memory and shown in table format
 - Soft pastel UI with modern cards, tabs, columns, and spinner animations
 
@@ -48,4 +51,4 @@ info project/
 ## Notes
 
 - This project uses in-memory storage (`st.session_state`) for simplicity.
-- The cryptography logic is educational and not production-grade.
+- Uses real cryptographic libraries (`bcrypt`, `cryptography`) while remaining educational and simple.
