@@ -113,7 +113,6 @@ algo = st.selectbox(
         "AES (Fernet)",
         "RSA Encryption/Decryption",
         "Hashing (SHA-256 vs MD5)",
-        "Base64 Encoding",
         "Compare Algorithms",
     ],
 )
@@ -299,41 +298,6 @@ elif algo == "Hashing (SHA-256 vs MD5)":
         )
         st.warning("Weakness: MD5 is collision-prone.")
         st.warning("Attack type: Collision attack.")
-
-elif algo == "Base64 Encoding":
-    with card("Input Card"):
-        text = st.text_input("Input text", "HELLO BASE64", key="b64_text")
-
-    with card("Processing Card"):
-        st.markdown("Flow: Input -> Base64 encoding -> Encoded output")
-        if st.button("Start Simulation", key="b64_start"):
-            run_steps(
-                [
-                    ("info", "Encoding bytes to Base64."),
-                    ("warning", "Base64 is formatting, not encryption."),
-                    ("success", "Encoded output ready."),
-                ]
-            )
-            bump_simulations()
-            add_log("simulation_run", "Base64 Encoding", actor=st.session_state.current_user or "guest")
-            encoded = base64.b64encode(text.encode()).decode()
-            decoded = base64.b64decode(encoded.encode()).decode(errors="ignore")
-            st.session_state.base64_output = (encoded, decoded)
-
-    with card("Output Card"):
-        out = st.session_state.get("base64_output")
-        if out:
-            encoded, decoded = out
-            st.code(f"Input: {text}\nEncoded: {encoded}\nDecoded: {decoded}")
-
-    with card("Attack Explanation Card"):
-        render_learning_text(
-            "Base64 converts binary/text to transport-safe text format.",
-            "Anyone can decode Base64 without a secret key.",
-            "It is useful for encoding, not for security protection.",
-        )
-        st.error("Weakness: No secrecy at all.")
-        st.error("Attack type: Immediate decode (no attack needed).")
 
 else:
     with card("Compare Algorithms"):
