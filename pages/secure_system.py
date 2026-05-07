@@ -173,11 +173,39 @@ with tabs[3]:
             except Exception:
                 st.error("File decryption failed.")
 
-    st.markdown("#### Password strength learning helper")
-    strength_label, score, tips = password_strength(plaintext[:24])
-    st.info(f"Sample strength score (using text sample): {strength_label} ({score}/5)")
-    if tips:
-        for tip in tips:
-            st.write(f"- {tip}")
+    st.markdown("#### Password Strength Checker (Interactive)")
+    st.info("Enter any password below to see live strength and improvement tips.")
+    password_input = st.text_input(
+        "Try a password",
+        type="password",
+        key="live_password_strength",
+        placeholder="Type password to analyze...",
+    )
+    if password_input:
+        strength_label, score, tips = password_strength(password_input)
+        # Show beginner-friendly labels.
+        display_label = "Medium" if strength_label == "Moderate" else strength_label
+
+        p1, p2, p3 = st.columns(3)
+        p1.write("Input")
+        p1.code("*" * len(password_input))
+        p2.write("Processing")
+        p2.code("Length + uppercase + lowercase + number + symbol")
+        p3.write("Output")
+        p3.code(f"{display_label} ({score}/5)")
+
+        if display_label == "Strong":
+            st.success("Strong password.")
+        elif display_label == "Medium":
+            st.warning("Medium strength password.")
+        else:
+            st.error("Weak password.")
+
+        if tips:
+            st.info("Suggestions to improve:")
+            for tip in tips:
+                st.write(f"- {tip}")
+        else:
+            st.success("Great! This password already meets all basic checks.")
     st.success("Fernet uses strong symmetric cryptography for data confidentiality.")
     end_card()
