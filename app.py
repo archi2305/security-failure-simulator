@@ -1,10 +1,11 @@
 import streamlit as st
 
+from components.ui import card
 from utils.state import init_state
-from utils.style import apply_theme, end_card, start_card
+from utils.style import apply_theme
 
 
-st.set_page_config(page_title="SecureSphere", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="SecureSphere", layout="wide")
 init_state()
 apply_theme()
 
@@ -20,28 +21,26 @@ col1.metric("Simulations Run", stats["simulations_run"])
 col2.metric("Login Attempts", stats["login_attempts"])
 col3.metric("Security Score", f'{stats["security_score"]}/100')
 
-start_card("Platform Trend Snapshot")
-st.bar_chart(
-    {
-        "Simulations": [stats["simulations_run"]],
-        "Login Attempts": [stats["login_attempts"]],
-        "Security Score": [stats["security_score"]],
-    }
-)
-end_card()
+with card("Platform Trend Snapshot"):
+    st.bar_chart(
+        {
+            "Simulations": [stats["simulations_run"]],
+            "Login Attempts": [stats["login_attempts"]],
+            "Security Score": [stats["security_score"]],
+        }
+    )
 
-start_card("How to Use")
-st.info("Use the sidebar to navigate modules in sequence for a full learning flow.")
-st.markdown(
-    """
-    - Open **simulator** to see insecure vs secure behavior
-    - Open **secure_system** to try bcrypt login, role control, and AES (Fernet) encryption
-    - Open **tools** for RSA signatures, hashes, and password checks
-    - Open **logs** to inspect recorded user actions
-    - Open **about** for architecture and team split
-    """
-)
-st.success("Tip: Read each section top-to-bottom. Every module follows a learning flow.")
-end_card()
+with card("How to Use"):
+    st.info("Use the sidebar to navigate modules in sequence for a full learning flow.")
+    st.markdown(
+        """
+        - Open **simulator** to see insecure vs secure behavior
+        - Open **secure_system** to try bcrypt login, role control, and AES (Fernet) encryption
+        - Open **tools** for RSA signatures, hashes, and password checks
+        - Open **logs** to inspect recorded user actions
+        - Open **about** for architecture and team split
+        """
+    )
+    st.success("Tip: Read each section top-to-bottom. Every module follows a learning flow.")
 
 st.caption("Built for academic evaluation with modular design for a 3-member team.")

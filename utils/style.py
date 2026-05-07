@@ -142,19 +142,3 @@ def apply_theme() -> None:
         """,
         unsafe_allow_html=True,
     )
-
-
-def start_card(title: str) -> None:
-    st.markdown(f'<div class="edu-card"><h3 style="margin-top:0.1rem;">{title}</h3></div>', unsafe_allow_html=True)
-
-
-def end_card() -> None:
-    st.divider()
-
-
-def explain(text: str) -> None:
-    st.markdown(f'<div class="explain-box">{text}</div>', unsafe_allow_html=True)
-
-
-def section_note(title: str, text: str) -> None:
-    st.info(f"**{title}:** {text}")
